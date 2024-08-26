@@ -15,10 +15,10 @@ from sqlalchemy.orm import sessionmaker
 from tqdm import tqdm
 
 from flacinfo import Flacinfo
-from models import Album, Artist, Base, Genre, Track
+from models import Album, Artist, Base
 
 PROGNAME = "check_new_albums"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 
 def get_artist(session, name: str) -> int:
@@ -36,14 +36,16 @@ def get_artist(session, name: str) -> int:
 def check_new_album(session, ff: Flacinfo) -> bool:
     """
     Adds an album to the database, if it does not exist
-    Returns True if the album was added
+    Returns True if the album does not exist
     """
 
-    if get_artist(session, ff.artist) == -1:
+    artist_id = get_artist(session, ff.artist)
+    if artist_id == -1:
         # must be new artist, so no album
         logger.info(f"{ff.artist}-{ff.date}={ff.album} is already in the database.")
-        return False
-
+        return True
+    else:
+        ff.artist_id = artist_id
     # let's check for the album
     result = (
         session.query(Album).filter_by(artist_id=ff.artist_id, date=ff.date, title=ff.album).first()
@@ -113,7 +115,22 @@ def check_new_albums_in_filepath(filepath):
 
 
 if __name__ == "__main__":
-    # filepath = "/home/rodney/Music/done/test"
-    # filepath = "/home/rodney/Music/done/cdimages-new"
-    # filepath = "/media/rodney/astor/music/lossless/cdimages/"
+
     check_new_albums_in_filepath()
+
+    # setup--------------------------------------standalone test
+    # # setup the logger
+    # setup_logger(log_to_file=True)
+
+    # # connect to database
+    # engine = create_engine("sqlite:///musicdb.db")
+    # Session = sessionmaker(bind=engine)
+    # session = Session()
+    # Base.metadata.create_all(engine)
+
+    # # present
+    # # filepath = "/home/rodney/Music/done/cdimages-new/Alanis Morissette/2008-Flavours Of Entanglement [Deluxe Ed]/Alanis Morissette - Flavours Of Entanglement [Deluxe Ed] CD01.flac"
+    # # not present
+    # filepath = "/home/rodney/Music/done/cdimages-new/Anna Tivel/2024-Living Thing/Anna Tivel - Living Thing.flac"
+    # ff = Flacinfo(filepath)
+    # print(check_new_album(session, ff))
