@@ -113,6 +113,7 @@ def add_albums_in_filepath(filepath):
 
     # add albums
     errors = 0
+    print("Album location: ", filepath)
     print("Gathering and sorting albums...")
     files = sorted(list(Path(filepath).glob("**/*.flac")))
     print("Adding albums to musicdb.db")
@@ -132,5 +133,6 @@ def add_albums_in_filepath(filepath):
 if __name__ == "__main__":
     # filepath = "/home/rodney/Music/done/test"
     # filepath = "/home/rodney/Music/done/cdimages-new"
-    filepath = "/media/rodney/astor/music/lossless/cdimages/"
+    # filepath = "/media/rodney/astor/music/lossless/cdimages/"
+    filepath = "/srv/sata2/akiba/Music/cdimages-new/"
     add_albums_in_filepath(filepath)
