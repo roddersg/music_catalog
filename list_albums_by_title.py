@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
-# list_album_by_artist.py
-# provides a simplified album listing
+# list_album_by_title.py
+# provides a simplified album search by album title
 
 import textwrap
 
@@ -11,8 +11,8 @@ from tabulate import tabulate
 
 from models import Album, Artist, Base, Genre
 
-PROGNAME = "list_albums_by_artist"
-VERSION = "0.2.0"
+PROGNAME = "list_albums_by_title"
+VERSION = "0.1.0"
 
 # 0.2.0
 # uses tabulate to display data, cjk-textwrap for CJK chars
@@ -20,8 +20,8 @@ VERSION = "0.2.0"
 
 @click.command()
 @click.version_option(version=VERSION, prog_name=PROGNAME)
-@click.argument("artist")
-def list_albums_by_artist(artist):
+@click.argument("title")
+def list_albums_by_title(title: str):
     """
     List albums by artist (using LIKE operator)
     Use '%' as wildcard
@@ -33,12 +33,12 @@ def list_albums_by_artist(artist):
     Base.metadata.create_all(engine)
 
     # ask user for artist
-    click.echo(f"Search for albums by artist (using LIKE '{artist}')\n")
+    click.echo(f"Search for albums by title (using LIKE '{title}')\n")
     results = (
         session.query(Album, Artist, Genre)
         .join(Artist)
         .join(Genre)
-        .filter(Artist.name.like(artist))
+        .filter(Album.title.like(title))
         .order_by(Artist.name)
         .order_by(Album.date)
         .order_by(Album.title)
@@ -54,7 +54,7 @@ def list_albums_by_artist(artist):
             ]
             for r in results
         ]
-        headers = ["Id", "Artist", "Date", "Title"]
+        headers: list = ["Id", "Artist", "Date", "Title"]
         print(tabulate(catalog, headers))
     else:
         print("No albums found")
@@ -62,4 +62,4 @@ def list_albums_by_artist(artist):
 
 
 if __name__ == "__main__":
-    list_albums_by_artist()
+    list_albums_by_title()
